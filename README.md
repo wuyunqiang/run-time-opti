@@ -24,24 +24,7 @@ https://github.com/wuyunqiang/dynamic-tasks/assets/13480948/d2d89081-5d89-4df9-8
 npm install run-time-opti || yarn add run-time-opti
 ```
 
-```
 默认ES6语法 使用方自行转译和polyfill
-例如vue: 通过配置vue.config.js里面的transpileDependencies
-
-例如react通过配置
-rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules\/(?!(run-time-opti)\/).*/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
-          }
-        }
-      }
-    ]
-```
 
 ```javascript
 const p1 = (res) => {
