@@ -1,5 +1,5 @@
 /**
- * MessageChannel宏任务于setTimeout类似 立即执行无延迟
+ * MessageChannel宏任务与setTimeout类似 立即执行无延迟
  * @param fn 
  */
 export const setZeroTimeout = (fn: () => void) => {
