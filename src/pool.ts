@@ -11,7 +11,7 @@ let threadPool: Worker[] = [];
  * @param max 最大并发数 默认为2 最好和cpu数量一致 不要设置过多
  * @returns 返回一个promise
  */
-export const pool = async (list: PoolList, max = 1) => {
+export const pool = async (list: PoolList, max = 2) => {
   if (!blob) {
     blob = new Blob([workerStr], { type: 'text/plain' });
   }
