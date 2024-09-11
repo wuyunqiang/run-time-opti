@@ -6,8 +6,8 @@
  * @returns Promise
  */
 export const yieldToMain = async () => {
-  if(typeof MessageChannel !== 'undefined') {
-    let _resolve:(value?: any)=>void;
+  if (typeof MessageChannel !== 'undefined') {
+    let _resolve: (value?: any) => void;
     const p = new Promise(resolve => {
       _resolve = resolve;
     })
@@ -21,17 +21,29 @@ export const yieldToMain = async () => {
     port1.postMessage('yield')
     return p;
   }
-  
+
   return new Promise(resolve => {
     setTimeout(resolve, 0);
   });
 };
 
 /**
- * @returns Promise
+ * 延迟一定时间 不阻塞主线程
+ * @param duration 
+ * @returns 
  */
-export const sleep = async (time:number) => {
+export const sleep = async (duration: number) => {
   return new Promise(resolve => {
-    setTimeout(resolve, time);
+    setTimeout(resolve, duration);
   });
 };
+
+
+/**
+ * 阻塞主线程 卡死主线程一定时间
+ * @param duration 毫秒
+ */
+export const block = (duration = 1 * 1000) => {
+  const current = Date.now();
+  while (Date.now() - current < duration) { }
+}
