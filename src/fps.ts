@@ -31,97 +31,88 @@ export const autoSysFps = calculateAverageFps(5);
 
 
 /**
- * 帧率限制
+ * 以预期的帧率执行回调
+ * @param cb 
+ * @param fps 
  * @returns 
  */
-export const fpsLimiter = () => {
+export const startExpectFps = (cb: ICallBack, fps: number) => {
+    let stop = false;
+    let rafId = 0;
+    let frameCount = 0;
+    const fpsInterval = 1000 / fps;
+    let now = 0;
+    let then = Date.now();
+    const startTime = then;
+    let delta;
+    let currentFps;
 
-    /**
-     * 以预期的帧率执行回调
-     * @param cb 
-     * @param fps 
-     * @returns 
-     */
-    const startExpectFps = (cb: ICallBack, fps: number) => {
-        let stop = false;
-        let rafId = 0;
-        let frameCount = 0;
-        const fpsInterval = 1000 / fps;
-        let now = 0;
-        let then = Date.now();
-        const startTime = then;
-        let delta;
-        let currentFps;
-
-        function loop() {
-            if (stop) {
-                return;
-            }
-            rafId = requestAnimationFrame(loop);
-            now = Date.now();
-            delta = now - then;
-            if (delta > fpsInterval) {
-                then = now - (delta % fpsInterval);
-                if (cb) {
-                    const sinceStart = now - startTime;
-                    currentFps = Math.round((1000 / (sinceStart / ++frameCount)) * 100) / 100;
-                    cb(currentFps);
-                }
+    function loop() {
+        if (stop) {
+            return;
+        }
+        rafId = requestAnimationFrame(loop);
+        now = Date.now();
+        delta = now - then;
+        if (delta > fpsInterval) {
+            then = now - (delta % fpsInterval);
+            if (cb) {
+                const sinceStart = now - startTime;
+                currentFps = Math.round((1000 / (sinceStart / ++frameCount)) * 100) / 100;
+                cb(currentFps);
             }
         }
+    }
 
-        const stopFps = () => {
-            stop = true;
-            if (rafId) {
-                cancelAnimationFrame(rafId);
-            }
-        };
-        loop();
+    const stopFps = () => {
+        stop = true;
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+        }
+    };
+    loop();
 
-        return stopFps
+    return stopFps
+};
+
+/**
+ * 已系统的帧率执行回调
+ * @param cb 
+ * @returns 
+ */
+export const startSysFps = (cb: ICallBack) => {
+    let stop = false;
+    let rafId = 0;
+
+    const loop = async () => {
+        if (stop) {
+            return;
+        }
+        rafId = requestAnimationFrame(loop);
+        cb && cb()
     };
 
-    /**
-     * 已系统的帧率执行回调
-     * @param cb 
-     * @returns 
-     */
-    const startSysFps = (cb: ICallBack) => {
-        let stop = false;
-        let rafId = 0;
+    const stopFps = () => {
+        stop = true;
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+        }
+    };
+    loop();
+    return stopFps;
+}
 
-        const loop = async () => {
-            if (stop) {
-                return;
-            }
-            rafId = requestAnimationFrame(loop);
-            cb && cb()
-        };
-
-        const stopFps = () => {
-            stop = true;
-            if (rafId) {
-                cancelAnimationFrame(rafId);
-            }
-        };
-        loop();
-        return stopFps;
-    }
-
-    /***
-     * raf控制requestAnimationFrame执行频率 = Min(系统, 60)
-     * 为了兼容部分帧率为120fps的系统
-     */
-    const raf = async (cb: ICallBack) => {
-        const expFps = 60;
-        return autoSysFps.then((sysFps: any) => {
-            if (sysFps > expFps) {
-                return startExpectFps(cb, expFps)
-            } else {
-                return startSysFps(cb)
-            }
-        })
-    }
-
-    return { raf, startExpectFps, startSysFps };
-};
+/***
+ * raf控制requestAnimationFrame执行频率 = Min(系统, 60)
+ * 为了兼容部分帧率为120fps的系统
+ */
+export const raf = async (cb: ICallBack) => {
+    const expFps = 60;
+    return autoSysFps.then((sysFps: any) => {
+        if (sysFps > expFps) {
+            return startExpectFps(cb, expFps)
+        } else {
+            return startSysFps(cb)
+        }
+    })
+}
